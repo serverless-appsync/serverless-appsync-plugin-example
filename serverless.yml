@@ -1,0 +1,119 @@
+service: blog
+
+frameworkVersion: '3'
+
+configValidationMode: error
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-appsync-plugin
+  - serverless-esbuild
+
+params:
+  prod:
+    domain: api.blog.serverless.rehab
+    cachingEnabled: true
+    wafEnabled: true
+
+  default:
+    domain: ${sls:stage}.blog.serverless.rehab
+    cachingEnabled: false
+    wafEnabled: false
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+
+appSync:
+  name: blogs-api
+
+  logging:
+    level: ALL
+
+  xrayEnabled: false
+
+  domain:
+    name: ${param:domain}
+    hostedZoneId: Z077055311IDUQVT5EK0D
+
+  authentication:
+    type: AMAZON_COGNITO_USER_POOLS
+    config:
+      userPoolId: !Ref CognitoUserPool
+      defaultAction: ALLOW
+
+  caching:
+    enabled: ${param:cachingEnabled}
+    behavior: PER_RESOLVER_CACHING
+    type: SMALL
+    ttl: 300
+    atRestEncryption: true
+    transitEncryption: true
+
+  waf:
+    enabled: ${param:wafEnabled}
+    rules:
+      - throttle: 100
+      - disableIntrospection
+
+  dataSources:
+    posts:
+      type: AMAZON_DYNAMODB
+      config:
+        tableName: !Ref Posts
+
+  resolvers:
+    - Query.getPost:
+        dataSource: posts
+        caching:
+          ttl: 60
+          keys:
+            - '$context.arguments.id' #FIXME in doc
+
+      Mutation.createPost: posts
+
+      Mutation.updatePost:
+        request: false
+        response: false
+        dataSource:
+          type: AWS_LAMBDA
+          config:
+            function:
+              handler: src/updatePost.handler
+              iamRoleStatements:
+                - Effect: 'Allow'
+                  Action:
+                    - dynamodb:UpdateItem
+                  Resource: !GetAtt Posts.Arn
+
+resources:
+  Resources:
+    Posts:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: posts
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: blog
+        UsernameAttributes:
+          - email
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        UserPoolId: !Ref CognitoUserPool
+        ClientName: Web
+        CallbackURLs:
+          - https://example.com/signedin
+        LogoutURLs:
+          - https://example.com/signedout

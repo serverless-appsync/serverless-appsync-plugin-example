@@ -1,0 +1,23 @@
+{
+  "name": "serverless-appsync-plugin-v2-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.100",
+    "esbuild": "^0.14.43",
+    "serverless": "^3.19.0",
+    "serverless-appsync-plugin": "^2.0.0-alpha.11",
+    "serverless-esbuild": "^1.30.0",
+    "serverless-iam-roles-per-function": "^3.2.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.110.0",
+    "@aws-sdk/lib-dynamodb": "^3.110.0"
+  }
+}

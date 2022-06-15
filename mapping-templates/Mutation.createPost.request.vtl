@@ -1,0 +1,22 @@
+#set($id=$util.autoId())
+#set($attributeValues={})
+$util.qr($attributeValues.put("id", $util.dynamodb.toDynamoDB($id)))
+$util.qr($attributeValues.put("createdAt", $util.dynamodb.toDynamoDB($util.time.nowISO8601())))
+$util.qr($attributeValues.put("updatedAt", $util.dynamodb.toDynamoDB($util.time.nowISO8601())))
+#foreach($item in $ctx.args.post.entrySet())
+  $util.qr($attributeValues.put("${item.key}", $util.dynamodb.toDynamoDB($item.value)))
+#end
+{
+  "version": "2018-05-29",
+  "operation": "PutItem",
+  "key": {
+    "id": $util.dynamodb.toDynamoDBJson("${id}")
+  },
+  "attributeValues": $util.toJson($attributeValues),
+  "condition": {
+    "expression": "attribute_not_exists(#id)",
+    "expressionNames": {
+      "#id": "id"
+    }
+  }
+}
