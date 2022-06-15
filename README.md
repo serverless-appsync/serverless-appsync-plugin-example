@@ -1,0 +1,1 @@
+An example project showing how to deploy an AppSYnc GraphQL API using the [Serverless Framework](https://github.com/serverless/serverless) and the [serverless-appsync-plugin](https://github.com/sid88in/serverless-appsync-plugin/)
