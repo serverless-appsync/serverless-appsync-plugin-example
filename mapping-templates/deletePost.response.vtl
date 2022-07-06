@@ -1,0 +1,14 @@
+#if($ctx.error)
+  $util.error("InternalError")
+#elseif(!$ctx.result)
+  $util.error("NotFoundError")
+#else
+  $util.qr($ctx.stash.put("result", true))
+  #set($event={
+    "DetailType": "postDeleted",
+    "Source": "AppSync",
+    "Detail": $util.toJson(${ctx.result})
+  })
+  $util.qr($ctx.stash.put("event", $event))
+#end
+{}

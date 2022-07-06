@@ -1,0 +1,18 @@
+## If delete failed, skip
+#if(!$ctx.stash.result)
+  #return
+#end
+{
+  "version": "2018-05-29",
+  "method": "POST",
+  "resourcePath": "/",
+  "params": {
+    "headers": {
+      "content-type": "application/x-amz-json-1.1",
+      "x-amz-target":"AWSEvents.PutEvents"
+    },
+    "body": {
+      "Entries": [$util.toJson($ctx.stash.event)]
+    }
+  }
+}

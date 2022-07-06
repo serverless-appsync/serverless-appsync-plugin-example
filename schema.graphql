@@ -5,6 +5,7 @@ type Query {
 type Mutation {
   createPost(post: CreatePostInput): Post!
   updatePost(post: UpdatePostInput): Post!
+  deletePost(id: ID!): Boolean!
 }
 
 type Post {

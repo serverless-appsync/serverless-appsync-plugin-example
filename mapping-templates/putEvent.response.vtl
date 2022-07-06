@@ -1,0 +1,9 @@
+#if($ctx.result.statusCode != 200)
+  $util.error("Failed calling eventBride SDK", "Error")
+#end
+#set($response=$util.parseJson($ctx.result.body))
+#if($response.Entries.size() == 1)
+  $util.toJson($response.Entries.get(0).EventId)
+#else
+  $util.error("Failed delivering the message", "Error")
+#end
